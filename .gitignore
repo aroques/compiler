@@ -1,0 +1,5 @@
+build
+.vscode
+.~lock*
+*.fs182
+comp
