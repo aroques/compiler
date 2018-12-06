@@ -64,10 +64,13 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
     if (node->label == "vars")
     {
-        // Token definition
+        // ID token definition
         Token id_tk = node->tokens.front();
         Token id_tk_val = node->tokens.at(1);
-        verify_id_tk_definition(id_tk.instance, id_tk_val.instance, id_tk.line_number); 
+        
+        verify_id_tk_definition(id_tk.instance, id_tk.line_number);
+        
+        push_onto_stack(id_tk.instance, id_tk_val.instance);
     }
 
     if (node->label == "block")
@@ -134,16 +137,19 @@ void ParseTreeProcessor::process_node_tokens(Node* node)
     }
 }
 
-void ParseTreeProcessor::verify_id_tk_definition(std::string tk_instance, std::string tk_val, int tk_line_no)
+void ParseTreeProcessor::verify_id_tk_definition(std::string tk_instance, int tk_line_no)
 {
     int tk_idx = tk_stack.find(tk_instance);
-    // TODO: Add STACKR or STACKW to target
 
     if (var_cnt_stack.top() > 0 && tk_idx >= 0 && tk_idx < var_cnt_stack.top())
         semantics_error(tk_line_no, "'" + tk_instance + "' is already defined in this block");
-    
+}
+
+void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk_val)
+{
     // token not previously defined, so push onto stack and count it
     tk_stack.push(tk_instance);
+    
     // TODO: Add push to target
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
