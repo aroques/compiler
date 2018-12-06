@@ -7,7 +7,7 @@
 
 #include <stack>
 
-class ParseTreeNodeProcessor
+class ParseTreeProcessor
 {
 private:
     TokenStack tk_stack;        // Holds token definitions
@@ -23,19 +23,23 @@ private:
     int label_cnt = 0;
 
     std::string target = ""; // The target file that will be produced
-    bool target_delivered = 0;
 
+    void traverse_preorder(Node* node);
+    void process_node(Node* node);
+    void postprocess_node(Node* node);
     void process_node_label(Node* node);
     void process_node_tokens(Node* node);
+    void postprocess_target();
+
     void verify_id_tk_definition(Token tk);
     void verify_id_tk_usage(Token tk);
 
 public:
-    ParseTreeNodeProcessor();
+    ParseTreeProcessor();
 
-    void process_node(Node* node);
-    void postprocess_node(Node* node);
-    std::string get_target();
+    void process_parse_tree(Node* root);
+
+    std::string get_target() { return target; };
 
 };
 

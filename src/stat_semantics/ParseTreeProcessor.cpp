@@ -1,14 +1,48 @@
-#include "stat_semantics/include/ParseTreeNodeProcessor.hpp"
+#include "stat_semantics/include/ParseTreeProcessor.hpp"
 #include "error_handling/include/error_handling.hpp"
 
 static void print_error_and_exit(int line_no, std::string reason);
 
-ParseTreeNodeProcessor::ParseTreeNodeProcessor() 
+ParseTreeProcessor::ParseTreeProcessor() 
 {
     var_cnt_stack.push(0);
 }
 
-void ParseTreeNodeProcessor::process_node(Node* node)
+void ParseTreeProcessor::process_parse_tree(Node* root)
+{
+    traverse_preorder(root);
+    postprocess_target();
+    return;
+}
+
+void ParseTreeProcessor::postprocess_target()
+{
+    for (int i = 0; i < temp_var_cnt; i++)
+        target += "V" + std::to_string(i) + "\n";
+    
+    target += "STOP\n";
+}
+
+void ParseTreeProcessor::traverse_preorder(Node* node)
+{
+    if (node == NULL) 
+        return;
+
+    process_node(node);
+
+    if (node->children.size() > 0)
+    {
+        // recursively descend down tree
+        for (auto child: node->children) 
+            traverse_preorder(child);
+    }
+    
+    postprocess_node(node);
+    
+    return;
+}
+
+void ParseTreeProcessor::process_node(Node* node)
 {
     process_node_label(node);
 
@@ -19,7 +53,7 @@ void ParseTreeNodeProcessor::process_node(Node* node)
     process_node_tokens(node);
 }
 
-void ParseTreeNodeProcessor::process_node_label(Node* node)
+void ParseTreeProcessor::process_node_label(Node* node)
 {
     if (node->label == "block")
     {
@@ -36,9 +70,30 @@ void ParseTreeNodeProcessor::process_node_label(Node* node)
         target += "STORE V" + std::to_string(temp_var_cnt) + "\n";
         target += "WRITE V" + std::to_string(temp_var_cnt++) + "\n";
     }
+
+    if (node->label == "R")
+    {
+        if (node->children.size() == 1)
+            traverse_preorder(node->children.front());
+        
+        if (node->tokens.size() == 1)
+            target += "LOAD " + node->tokens.front().instance + "\n";
+    }
+
+    if (node->label == "M")
+    {
+        if (node->children.front()->label == "R")
+            traverse_preorder(node->children.front());
+        
+        else // child is M, so negate what is in acc 
+        {
+            traverse_preorder(node->children.front());
+            target += " MULT -1\n";
+        }
+    }
 }
 
-void ParseTreeNodeProcessor::process_node_tokens(Node* node)
+void ParseTreeProcessor::process_node_tokens(Node* node)
 {
     for (auto tk: node->tokens)
     {
@@ -53,7 +108,7 @@ void ParseTreeNodeProcessor::process_node_tokens(Node* node)
     }
 }
 
-void ParseTreeNodeProcessor::verify_id_tk_definition(Token tk)
+void ParseTreeProcessor::verify_id_tk_definition(Token tk)
 {
     int tk_idx = tk_stack.find(tk);
     // TODO: Add STACKR or STACKW to target
@@ -67,7 +122,7 @@ void ParseTreeNodeProcessor::verify_id_tk_definition(Token tk)
     var_cnt_stack.top()++;
 }
 
-void ParseTreeNodeProcessor::verify_id_tk_usage(Token tk)
+void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 {
     // TODO: Add STACKR or STACKW to target
     if (tk_stack.find(tk) < 0)
@@ -79,7 +134,7 @@ static void print_error_and_exit(int line_no, std::string reason)
     print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
 }
 
-void ParseTreeNodeProcessor::postprocess_node(Node* node)
+void ParseTreeProcessor::postprocess_node(Node* node)
 {
     if (node->label == "block")
     {
@@ -92,19 +147,4 @@ void ParseTreeNodeProcessor::postprocess_node(Node* node)
         // and pop number of variables defined in this block
         var_cnt_stack.pop();
     }
-}
-
-std::string ParseTreeNodeProcessor::get_target()
-{
-    if (!target_delivered)
-    {
-        for (int i = 0; i < temp_var_cnt; i++)
-            target += "V" + std::to_string(i) + "\n";
-        
-        target += "STOP\n";
-
-        target_delivered = 1;
-    }
-    
-    return target;
 }
