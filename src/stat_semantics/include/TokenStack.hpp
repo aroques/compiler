@@ -7,15 +7,15 @@
 class TokenStack
 {
 private:
-    std::stack<Token> stack;
-    int find(std::stack <Token> s, std::string id_instance);
+    std::stack<std::string> stack;
+    int find(std::stack <std::string> s, std::string tk_instance);
 
 public:
     TokenStack();
 
-    void push(Token tk);
+    void push(std::string tk_instance);
     void pop();
-    int find(Token tk);
+    int find(std::string tk_instance);
 };
 
 #endif // !TOKEN_STACK_HPP

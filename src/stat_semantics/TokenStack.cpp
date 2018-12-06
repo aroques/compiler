@@ -2,9 +2,9 @@
 
 TokenStack::TokenStack() {};
 
-void TokenStack::push(Token tk)
+void TokenStack::push(std::string tk_instance)
 {
-    this->stack.push(tk);
+    this->stack.push(tk_instance);
 }
 
 void TokenStack::pop()
@@ -12,13 +12,13 @@ void TokenStack::pop()
     this->stack.pop();
 }
 
-int TokenStack::find(Token tk)
+int TokenStack::find(std::string tk_instance)
 {
-    std::stack<Token> stack_to_search = this->stack;
-    return find(stack_to_search, tk.instance);
+    std::stack<std::string> stack_to_search = this->stack;
+    return find(stack_to_search, tk_instance);
 }
 
-int TokenStack::find(std::stack <Token> s, std::string id_instance) 
+int TokenStack::find(std::stack <std::string> s, std::string tk_instance) 
 {
     int cnt = -1;
 
@@ -26,7 +26,7 @@ int TokenStack::find(std::stack <Token> s, std::string id_instance)
     {
         cnt++;
 
-        if (s.top().instance == id_instance)
+        if (s.top() == tk_instance)
             return cnt;
         
         s.pop();

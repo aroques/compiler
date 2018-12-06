@@ -24,6 +24,8 @@ private:
 
     std::string target = ""; // The target file that will be produced
 
+    std::string get_temp_var();
+
     void traverse_preorder(Node* node);
     void process_node(Node* node);
     void postprocess_node(Node* node);
@@ -31,7 +33,7 @@ private:
     void process_node_tokens(Node* node);
     void postprocess_target();
 
-    void verify_id_tk_definition(Token tk);
+    void verify_id_tk_definition(std::string tk_instance, std::string tk_val, int tk_line_no);
     void verify_id_tk_usage(Token tk);
 
 public:
