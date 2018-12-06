@@ -3,3 +3,4 @@ build
 .~lock*
 *.fs182
 comp
+*.asm
