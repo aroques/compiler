@@ -18,8 +18,13 @@ private:
     */
     std::stack<int> var_cnt_stack; // TODO: initialize to hold a zero. maybe initialization list({0});
     
-    std::string target;
+    // Used to count number of temp vars and labels used in target language
+    int temp_var_cnt = 0;
+    int label_cnt = 0;
 
+    std::string target = ""; // The target file that will be produced
+
+    void process_node_label(Node* node);
     void process_node_tokens(Node* node);
     void verify_id_tk_definition(Token tk);
     void verify_id_tk_usage(Token tk);
