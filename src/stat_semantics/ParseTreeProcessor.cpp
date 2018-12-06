@@ -36,12 +36,12 @@ void ParseTreeProcessor::traverse_preorder(Node* node)
 
     process_node(node);
 
-    if (node->children.size() > 0)
-    {
-        // recursively descend down tree
-        for (auto child: node->children) 
-            traverse_preorder(child);
-    }
+    // if (node->children.size() > 0)
+    // {
+    //     // recursively descend down tree
+    //     for (auto child: node->children) 
+    //         traverse_preorder(child);
+    // }
     
     postprocess_node(node);
     
@@ -61,7 +61,6 @@ void ParseTreeProcessor::process_node(Node* node)
 
 void ParseTreeProcessor::process_node_label(Node* node)
 {
-
     if (node->label == "vars")
     {
         // ID token definition
@@ -71,6 +70,14 @@ void ParseTreeProcessor::process_node_label(Node* node)
         verify_id_tk_definition(id_tk.instance, id_tk.line_number);
         
         push_onto_stack(id_tk.instance, id_tk_val.instance);
+
+        if (node->children.size() > 0)
+        {
+            // recursively descend down tree
+            for (auto child: node->children) 
+                traverse_preorder(child);
+        }
+        return;
     }
 
     if (node->label == "block")
@@ -78,6 +85,13 @@ void ParseTreeProcessor::process_node_label(Node* node)
         // entering new block, so start new var count
         var_cnt_stack.push(0);
         // TODO: Add PUSH to target
+        if (node->children.size() > 0)
+        {
+            // recursively descend down tree
+            for (auto child: node->children) 
+                traverse_preorder(child);
+        }
+        return;
     }
 
     if (node->label == "in")
@@ -87,41 +101,105 @@ void ParseTreeProcessor::process_node_label(Node* node)
         target += "LOAD " + temp_var + "\n";
         std::string tk = node->tokens.front().instance;
         target += "STACKW " + std::to_string(tk_stack.find(tk)) + "\n";
+        return;
     }
 
     if (node->label == "out")
     {
+        traverse_preorder(node->children.front());
         std::string temp_var = get_temp_var();// process identifier token
         target += "STORE " + temp_var + "\n";
         target += "WRITE " + temp_var + "\n";
+        return;
+    }
+    
+    if (node->label == "expr")
+    {
+        if (node->tokens.size() == 1)
+        {
+            // evaluate right child expr
+            traverse_preorder(node->children.at(1));
+            
+            std::string temp_var = get_temp_var();
+            target += "STORE " + temp_var + "\n";
+            
+            // evaluate 1st child A
+            traverse_preorder(node->children.at(0));
+
+            Token tk = node->tokens.front();
+            
+            if (tk.instance == "/")
+                target += "DIV " + temp_var + "\n";
+            else // tk is '*'
+                target += "MULT " + temp_var + "\n";
+
+        }
+        else // evaluate child node A
+            traverse_preorder(node->children.front());
+        return;
+    }
+
+    if (node->label == "A")
+    {
+        if (node->tokens.size() == 1)
+        {
+            // evaluate right child A
+            traverse_preorder(node->children.at(1));
+            
+            std::string temp_var = get_temp_var();
+            target += "STORE " + temp_var + "\n";
+            
+            // evaluate 1st child M
+            traverse_preorder(node->children.at(0));
+
+            Token tk = node->tokens.front();
+            
+            if (tk.instance == "+")
+                target += "ADD " + temp_var + "\n";
+            else // tk is '-'
+                target += "SUB " + temp_var + "\n";
+
+        }
+        else // evaluate child node M
+            traverse_preorder(node->children.front());
+        return;
     }
 
     if (node->label == "R")
     {
-        //if (node->children.size() == 1)
-        //    traverse_preorder(node->children.front());
-        
         if (node->tokens.size() == 1)
         {   
             std::string tk = node->tokens.front().instance;
             target += "STACKR " + std::to_string(tk_stack.find(tk)) + "\n";
         }
-            
+        else // child node is expr
+            traverse_preorder(node->children.front());
+        return;
     }
     
-    // TODO: need case for expr and A nodes
 
-    // if (node->label == "M")
-    // {
-    //     if (node->children.front()->label == "R")
-    //         traverse_preorder(node->children.front());
+    if (node->label == "M")
+    {
+        Node* child = node->children.front();
         
-    //     else // child is M, so negate what is in acc 
-    //     {
-    //         traverse_preorder(node->children.front());
-    //         target += " MULT -1\n";
-    //     }
-    // }
+        if (child->label == "R")
+            traverse_preorder(child);
+        
+        else // child is M, so negate what is in acc 
+        {
+            traverse_preorder(child);
+            target += "MULT -1\n";
+        }
+        return;
+    }
+
+    if (node->children.size() > 0)
+    {
+        // recursively descend down tree
+        for (auto child: node->children) 
+            traverse_preorder(child);
+    }
+        
 }
 
 void ParseTreeProcessor::process_node_tokens(Node* node)
@@ -187,8 +265,10 @@ void ParseTreeProcessor::postprocess_node(Node* node)
         var_cnt_stack.pop();
     }
 
-    if (node->label == "M" && node->children.front()->label == "M")
-    {
-        target += "MULT -1\n";
-    }
+    // if (node->label == "M" && node->children.front()->label == "M")
+    // {
+    //     target += "MULT -1\n";
+    // }
+
+
 }
