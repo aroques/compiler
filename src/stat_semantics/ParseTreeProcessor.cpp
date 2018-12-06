@@ -1,7 +1,7 @@
 #include "stat_semantics/include/ParseTreeProcessor.hpp"
 #include "error_handling/include/error_handling.hpp"
 
-static void print_error_and_exit(int line_no, std::string reason);
+static void semantics_error(int line_no, std::string reason);
 
 ParseTreeProcessor::ParseTreeProcessor() 
 {
@@ -17,6 +17,7 @@ void ParseTreeProcessor::process_parse_tree(Node* root)
 
 void ParseTreeProcessor::postprocess_target()
 {
+    // initialize temp vars
     for (int i = 0; i < temp_var_cnt; i++)
         target += "V" + std::to_string(i) + " 0" + "\n";
     
@@ -139,7 +140,7 @@ void ParseTreeProcessor::verify_id_tk_definition(std::string tk_instance, std::s
     // TODO: Add STACKR or STACKW to target
 
     if (var_cnt_stack.top() > 0 && tk_idx >= 0 && tk_idx < var_cnt_stack.top())
-        print_error_and_exit(tk_line_no, "'" + tk_instance + "' is already defined in this block");
+        semantics_error(tk_line_no, "'" + tk_instance + "' is already defined in this block");
     
     // token not previously defined, so push onto stack and count it
     tk_stack.push(tk_instance);
@@ -155,10 +156,10 @@ void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 {
     // TODO: Add STACKR or STACKW to target
     if (tk_stack.find(tk.instance) < 0)
-        print_error_and_exit(tk.line_number, "'" + tk.instance + "' has not been defined");
+        semantics_error(tk.line_number, "'" + tk.instance + "' has not been defined");
 }
 
-static void print_error_and_exit(int line_no, std::string reason)
+static void semantics_error(int line_no, std::string reason)
 {
     print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
 }
