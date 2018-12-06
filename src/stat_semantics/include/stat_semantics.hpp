@@ -3,6 +3,6 @@
 
 #include "parser/include/Node.hpp"
 
-bool verify_semantics(Node* root);
+std::string generate_target(Node* root);
 
 #endif // !STAT_SEMANTICS_HPP

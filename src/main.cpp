@@ -8,6 +8,7 @@
 void validate_argc(int argc);
 void open_file(std::ifstream& file, char* argv[]);
 std::string get_target_filename(int argc, char* argv[]);
+void write_target_file(std::string target_filename, std::string target);
 
 int main(int argc, char* argv[])
 {
@@ -22,15 +23,23 @@ int main(int argc, char* argv[])
         std::cin.rdbuf(file.rdbuf());
     }
 
-    std::string target = get_target_filename(argc, argv);
-
     Node* root = parser();
+    std::string target = generate_target(root);
 
-    verify_semantics(root);
+    std::string target_filename = get_target_filename(argc, argv);
+    
+    write_target_file(target_filename, target);
 
     if (file.is_open()) file.close();
 
     return 0;
+}
+
+void write_target_file(std::string target_filename, std::string target)
+{
+    std::ofstream out(target_filename);
+    out << target;
+    out.close();
 }
 
 void validate_argc(int argc)

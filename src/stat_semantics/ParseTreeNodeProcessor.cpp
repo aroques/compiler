@@ -29,12 +29,12 @@ void ParseTreeNodeProcessor::process_node_label(Node* node)
     }
 
     if (node->label == "in")
-        target += printf("READ %s\n", node->tokens.front().instance);
+        target += "READ " + node->tokens.front().instance + "\n";
 
     if (node->label == "out")
     {
-        target += printf("STORE V%d\n", temp_var_cnt);
-        target += printf("WRITE V%d\n", ++temp_var_cnt);
+        target += "STORE V" + std::to_string(temp_var_cnt) + "\n";
+        target += "WRITE V" + std::to_string(temp_var_cnt++) + "\n";
     }
 }
 
@@ -92,4 +92,19 @@ void ParseTreeNodeProcessor::postprocess_node(Node* node)
         // and pop number of variables defined in this block
         var_cnt_stack.pop();
     }
+}
+
+std::string ParseTreeNodeProcessor::get_target()
+{
+    if (!target_delivered)
+    {
+        for (int i = 0; i < temp_var_cnt; i++)
+            target += "V" + std::to_string(i) + "\n";
+        
+        target += "STOP\n";
+
+        target_delivered = 1;
+    }
+    
+    return target;
 }

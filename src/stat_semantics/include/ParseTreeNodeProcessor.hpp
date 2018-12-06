@@ -23,6 +23,7 @@ private:
     int label_cnt = 0;
 
     std::string target = ""; // The target file that will be produced
+    bool target_delivered = 0;
 
     void process_node_label(Node* node);
     void process_node_tokens(Node* node);
@@ -34,6 +35,7 @@ public:
 
     void process_node(Node* node);
     void postprocess_node(Node* node);
+    std::string get_target();
 
 };
 

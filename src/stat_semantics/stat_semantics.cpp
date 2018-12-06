@@ -4,17 +4,17 @@
 
 static void traverse_preorder(Node* node, ParseTreeNodeProcessor& np);
 
-bool verify_semantics(Node* root)
+std::string generate_target(Node* root)
 {
     ParseTreeNodeProcessor np;
 
-    std::cout << "\nchecking static semantics..." << std::endl;
+    std::cout << "\nprocessing parse tree..." << std::endl;
 
     traverse_preorder(root, np);
 
-    std::cout << "static semantics OK" << std::endl;
+    std::cout << "parse tree processed" << std::endl;
     
-    return true;
+    return np.get_target();
 }
 
 static void traverse_preorder(Node* node, ParseTreeNodeProcessor& np)
