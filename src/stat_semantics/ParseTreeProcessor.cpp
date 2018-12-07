@@ -2,7 +2,7 @@
 #include "error_handling/include/error_handling.hpp"
 
 static void semantics_error(int line_no, std::string reason);
-static std::string get_asm_cmd(std::string tk_instance);
+static std::string get_asm_cmd(std::string op_tk_instance);
 
 ParseTreeProcessor::ParseTreeProcessor() 
 {
@@ -113,11 +113,16 @@ void ParseTreeProcessor::process_node_label(Node* node)
     
     if (node->label == "if")
     {
-        Node* right = node->children.at(2);  // expr
-        Node* left = node->children.at(0);   // expr
+        Node* right = node->children.at(2);     // expr
+        Node* left = node->children.at(0);      // expr
+        Node* RO_node = node->children.at(1);   // relational operator node
+        
+        std::string op_tk_instance = RO_node->tokens.at(0).instance;
+        
+        if (RO_node->tokens.size() > 1)
+            op_tk_instance += RO_node->tokens.at(1).instance;
 
-        std::string temp_var = eval_right_left(right, left);
-
+        eval_right_left(right, left, "-"); // subtract right from left
     }
 
     if (node->label == "expr")
@@ -126,13 +131,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         {
             Node* right = node->children.at(1); // expr
             Node* left = node->children.at(0);  // A
-            
-            std::string temp_var = eval_right_left(right, left);
-
             Token tk = node->tokens.front();
             
-            std::string asm_cmd = get_asm_cmd(tk.instance);
-            target += asm_cmd + " " + temp_var + "\n";
+            eval_right_left(right, left, tk.instance);
         }
         else // evaluate child node A
             traverse_preorder(node->children.front());
@@ -146,13 +147,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         {
             Node* right = node->children.at(1); // A
             Node* left = node->children.at(0);  // M
+            Token tk = node->tokens.front();;
 
-            std::string temp_var = eval_right_left(right, left);
-            Token tk = node->tokens.front();
-            
-            std::string asm_cmd = get_asm_cmd(tk.instance);
-            target += asm_cmd + " " + temp_var + "\n";
-
+            eval_right_left(right, left, tk.instance);
         }
         else // evaluate child node M
             traverse_preorder(node->children.front());
@@ -199,7 +196,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         
 }
 
-std::string ParseTreeProcessor::eval_right_left(Node* right, Node* left)
+void ParseTreeProcessor::eval_right_left(Node* right, Node* left, std::string op_tk_instance)
 {
     // evaluate right child
     traverse_preorder(right);
@@ -211,7 +208,10 @@ std::string ParseTreeProcessor::eval_right_left(Node* right, Node* left)
     // evaluate left child 
     traverse_preorder(left);
 
-    return temp_var;
+    // get assembly command. e.g., ADD or MULT
+    std::string asm_cmd = get_asm_cmd(op_tk_instance);
+    
+    target += asm_cmd + " " + temp_var + "\n";
 }
 
 void ParseTreeProcessor::process_node_tokens(Node* node)
@@ -275,21 +275,39 @@ static void semantics_error(int line_no, std::string reason)
     print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
 }
 
-static std::string get_asm_cmd(std::string tk_instance)
+static std::string get_asm_cmd(std::string op_tk_instance)
 {
-    if (tk_instance == "+")
+    if (op_tk_instance == "+")
         return "ADD";
     
-    if (tk_instance == "-")
+    if (op_tk_instance == "-")
         return "SUB";
     
-    if (tk_instance == "*")
+    if (op_tk_instance == "*")
         return "MULT";
     
-    if (tk_instance == "/")
+    if (op_tk_instance == "/")
+        return "DIV";
+    
+    if (op_tk_instance == "=")
         return "DIV";
 
-    print_error_and_exit("codegen: no assembly command for '" + tk_instance + "' operator");
+    if (op_tk_instance == ">")
+        return "DIV";
+
+    if (op_tk_instance == "<")
+        return "DIV";
+
+    if (op_tk_instance == ">=")
+        return "DIV";
+
+    if (op_tk_instance == "<=")
+        return "DIV";
+
+    if (op_tk_instance == "==")
+        return "DIV";
+
+    print_error_and_exit("codegen: no assembly command for '" + op_tk_instance + "' operator");
     
     return "";
 }
