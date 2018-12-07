@@ -77,6 +77,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
             for (auto child: node->children) 
                 traverse_preorder(child);
         }
+
         return;
     }
 
@@ -91,6 +92,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
             for (auto child: node->children) 
                 traverse_preorder(child);
         }
+
         return;
     }
 
@@ -101,6 +103,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         target += "LOAD " + temp_var + "\n";
         std::string tk = node->tokens.front().instance;
         target += "STACKW " + std::to_string(tk_stack.find(tk)) + "\n";
+
         return;
     }
 
@@ -110,21 +113,25 @@ void ParseTreeProcessor::process_node_label(Node* node)
         std::string temp_var = get_temp_var();// process identifier token
         target += "STORE " + temp_var + "\n";
         target += "WRITE " + temp_var + "\n";
+
         return;
     }
     
+    if (node->label == "if")
+    {
+       
+
+
+    }
+
     if (node->label == "expr")
     {
         if (node->tokens.size() == 1)
         {
-            // evaluate right child expr
-            traverse_preorder(node->children.at(1));
+            Node* right = node->children.at(1); // expr
+            Node* left = node->children.at(0);  // A
             
-            std::string temp_var = get_temp_var();
-            target += "STORE " + temp_var + "\n";
-            
-            // evaluate 1st child A
-            traverse_preorder(node->children.at(0));
+            std::string temp_var = eval_right_left(right, left);
 
             Token tk = node->tokens.front();
             
@@ -136,6 +143,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         }
         else // evaluate child node A
             traverse_preorder(node->children.front());
+        
         return;
     }
 
@@ -143,14 +151,10 @@ void ParseTreeProcessor::process_node_label(Node* node)
     {
         if (node->tokens.size() == 1)
         {
-            // evaluate right child A
-            traverse_preorder(node->children.at(1));
-            
-            std::string temp_var = get_temp_var();
-            target += "STORE " + temp_var + "\n";
-            
-            // evaluate 1st child M
-            traverse_preorder(node->children.at(0));
+            Node* right = node->children.at(1); // A
+            Node* left = node->children.at(0);  // M
+
+            std::string temp_var = eval_right_left(right, left);
 
             Token tk = node->tokens.front();
             
@@ -162,6 +166,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         }
         else // evaluate child node M
             traverse_preorder(node->children.front());
+        
         return;
     }
 
@@ -174,6 +179,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         }
         else // child node is expr
             traverse_preorder(node->children.front());
+        
         return;
     }
     
@@ -190,6 +196,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
             traverse_preorder(child);
             target += "MULT -1\n";
         }
+
         return;
     }
 
@@ -200,6 +207,21 @@ void ParseTreeProcessor::process_node_label(Node* node)
             traverse_preorder(child);
     }
         
+}
+
+std::string ParseTreeProcessor::eval_right_left(Node* right, Node* left)
+{
+    // evaluate right child
+    traverse_preorder(right);
+    
+    // store result in temp var
+    std::string temp_var = get_temp_var();
+    target += "STORE " + temp_var + "\n";
+    
+    // evaluate left child 
+    traverse_preorder(left);
+
+    return temp_var;
 }
 
 void ParseTreeProcessor::process_node_tokens(Node* node)

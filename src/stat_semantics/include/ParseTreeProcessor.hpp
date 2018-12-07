@@ -33,6 +33,8 @@ private:
     void process_node_tokens(Node* node);
     void postprocess_target();
 
+    std::string eval_right_left(Node* left, Node* right);
+
     void push_onto_stack(std::string tk_instance, std::string tk_val);
 
     void verify_id_tk_definition(std::string tk_instance, int tk_line_no);
