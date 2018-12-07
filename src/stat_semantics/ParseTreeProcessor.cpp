@@ -249,7 +249,6 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
 
 void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 {
-    // TODO: Add STACKR or STACKW to target
     if (tk_stack.find(tk.instance) < 0)
         semantics_error(tk.line_number, "'" + tk.instance + "' has not been defined");
 }
@@ -262,7 +261,6 @@ void ParseTreeProcessor::postprocess_node(Node* node)
         // so, pop token definitions
         for (int i = 0; i < var_cnt_stack.top(); i++)
         {
-            // TODO: Add POP to target
             tk_stack.pop();
             target += "POP\n";
         }
