@@ -2,6 +2,7 @@
 #include "error_handling/include/error_handling.hpp"
 
 static void semantics_error(int line_no, std::string reason);
+static std::string get_asm_cmd(std::string tk_instance);
 
 ParseTreeProcessor::ParseTreeProcessor() 
 {
@@ -119,7 +120,12 @@ void ParseTreeProcessor::process_node_label(Node* node)
     
     if (node->label == "if")
     {
-       
+        Node* right = node->children.at(2);  // expr
+        Node* left = node->children.at(0);   // expr
+
+        std::string temp_var = eval_right_left(right, left);
+
+        
 
 
     }
@@ -135,11 +141,8 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
             Token tk = node->tokens.front();
             
-            if (tk.instance == "/")
-                target += "DIV " + temp_var + "\n";
-            else // tk is '*'
-                target += "MULT " + temp_var + "\n";
-
+            std::string asm_cmd = get_asm_cmd(tk.instance);
+            target += asm_cmd + " " + temp_var + "\n";
         }
         else // evaluate child node A
             traverse_preorder(node->children.front());
@@ -155,13 +158,10 @@ void ParseTreeProcessor::process_node_label(Node* node)
             Node* left = node->children.at(0);  // M
 
             std::string temp_var = eval_right_left(right, left);
-
             Token tk = node->tokens.front();
             
-            if (tk.instance == "+")
-                target += "ADD " + temp_var + "\n";
-            else // tk is '-'
-                target += "SUB " + temp_var + "\n";
+            std::string asm_cmd = get_asm_cmd(tk.instance);
+            target += asm_cmd + " " + temp_var + "\n";
 
         }
         else // evaluate child node M
@@ -207,6 +207,25 @@ void ParseTreeProcessor::process_node_label(Node* node)
             traverse_preorder(child);
     }
         
+}
+
+static std::string get_asm_cmd(std::string tk_instance)
+{
+    if (tk_instance == "+")
+        return "ADD";
+    
+    if (tk_instance == "-")
+        return "SUB";
+    
+    if (tk_instance == "*")
+        return "MULT";
+    
+    if (tk_instance == "/")
+        return "DIV";
+
+    print_error_and_exit("codegen: no assembly command for '" + tk_instance + "' operator");
+    
+    return "";
 }
 
 std::string ParseTreeProcessor::eval_right_left(Node* right, Node* left)
