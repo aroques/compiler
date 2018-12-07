@@ -36,13 +36,6 @@ void ParseTreeProcessor::traverse_preorder(Node* node)
         return;
 
     process_node(node);
-
-    // if (node->children.size() > 0)
-    // {
-    //     // recursively descend down tree
-    //     for (auto child: node->children) 
-    //         traverse_preorder(child);
-    // }
     
     postprocess_node(node);
     
@@ -125,9 +118,6 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
         std::string temp_var = eval_right_left(right, left);
 
-        
-
-
     }
 
     if (node->label == "expr")
@@ -209,25 +199,6 @@ void ParseTreeProcessor::process_node_label(Node* node)
         
 }
 
-static std::string get_asm_cmd(std::string tk_instance)
-{
-    if (tk_instance == "+")
-        return "ADD";
-    
-    if (tk_instance == "-")
-        return "SUB";
-    
-    if (tk_instance == "*")
-        return "MULT";
-    
-    if (tk_instance == "/")
-        return "DIV";
-
-    print_error_and_exit("codegen: no assembly command for '" + tk_instance + "' operator");
-    
-    return "";
-}
-
 std::string ParseTreeProcessor::eval_right_left(Node* right, Node* left)
 {
     // evaluate right child
@@ -266,10 +237,9 @@ void ParseTreeProcessor::verify_id_tk_definition(std::string tk_instance, int tk
 
 void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk_val)
 {
-    // token not previously defined, so push onto stack and count it
+    // push token onto stack and count it
     tk_stack.push(tk_instance);
     
-    // TODO: Add push to target
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
     target += "STACKW " + std::to_string(var_cnt_stack.top()) + "\n";
@@ -282,11 +252,6 @@ void ParseTreeProcessor::verify_id_tk_usage(Token tk)
     // TODO: Add STACKR or STACKW to target
     if (tk_stack.find(tk.instance) < 0)
         semantics_error(tk.line_number, "'" + tk.instance + "' has not been defined");
-}
-
-static void semantics_error(int line_no, std::string reason)
-{
-    print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
 }
 
 void ParseTreeProcessor::postprocess_node(Node* node)
@@ -305,11 +270,28 @@ void ParseTreeProcessor::postprocess_node(Node* node)
         // and pop number of variables defined in this block
         var_cnt_stack.pop();
     }
+}
 
-    // if (node->label == "M" && node->children.front()->label == "M")
-    // {
-    //     target += "MULT -1\n";
-    // }
+static void semantics_error(int line_no, std::string reason)
+{
+    print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
+}
 
+static std::string get_asm_cmd(std::string tk_instance)
+{
+    if (tk_instance == "+")
+        return "ADD";
+    
+    if (tk_instance == "-")
+        return "SUB";
+    
+    if (tk_instance == "*")
+        return "MULT";
+    
+    if (tk_instance == "/")
+        return "DIV";
 
+    print_error_and_exit("codegen: no assembly command for '" + tk_instance + "' operator");
+    
+    return "";
 }
