@@ -1,11 +1,13 @@
 #!/bin/bash
 
-./comp testfile2
+file=$1
+
+./comp $file
 
 printf '\n'
 
-cat testfile2.asm
+cat "$file.asm"
 
 printf '\n'
 
-./VirtMach testfile2.asm
+./VirtMach "$file.asm"
