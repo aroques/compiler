@@ -1,9 +1,9 @@
 #include "stat_semantics/include/ParseTreeProcessor.hpp"
 #include "error_handling/include/error_handling.hpp"
+#include "stat_semantics/include/asm_commands.hpp"
 #include <iostream>
 
 static void semantics_error(int line_no, std::string reason);
-static std::string get_asm_cmd(std::string op_tk_instance);
 
 /*
     Public
@@ -355,38 +355,4 @@ void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 static void semantics_error(int line_no, std::string reason)
 {
     print_error_and_exit("semantics error: line " + std::to_string(line_no) + ": " + reason);
-}
-
-static std::string get_asm_cmd(std::string op_tk_instance)
-{
-    if (op_tk_instance == "+")
-        return "ADD";
-    
-    if (op_tk_instance == "-")
-        return "SUB";
-    
-    if (op_tk_instance == "*")
-        return "MULT";
-    
-    if (op_tk_instance == "/")
-        return "DIV";
-    
-    if (op_tk_instance == ">")
-        return "BRZNEG";
-
-    if (op_tk_instance == "<")
-        return "BRZPOS";
-
-    if (op_tk_instance == ">=")
-        return "BRNEG";
-
-    if (op_tk_instance == "<=")
-        return "BRPOS";
-
-    if (op_tk_instance == "==")
-        return "BRZERO";
-
-    print_error_and_exit("codegen: no assembly command for '" + op_tk_instance + "' operator");
-    
-    return "";
 }

@@ -1,7 +1,6 @@
 #ifndef PARSE_TREE_NODE_PROCESSOR_HPP
 #define PARSE_TREE_NODE_PROCESSOR_HPP
 
-
 #include "stat_semantics/include/TokenStack.hpp"
 #include "parser/include/Node.hpp"
 
