@@ -308,9 +308,6 @@ static std::string get_asm_cmd(std::string op_tk_instance)
     if (op_tk_instance == "/")
         return "DIV";
     
-    if (op_tk_instance == "=")
-        return "BRZERO";
-
     if (op_tk_instance == ">")
         return "BRZNEG";
 
