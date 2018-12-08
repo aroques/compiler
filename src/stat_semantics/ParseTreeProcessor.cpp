@@ -87,9 +87,27 @@ void ParseTreeProcessor::process_node_label(Node* node)
             tk_stack.pop();
             target += "POP\n";
         }
+        
         // and pop number of variables defined in this block
         var_cnt_stack.pop();
 
+        return;
+    }
+    
+    if (node->label == "if")
+    {
+        cond_stat(node);
+        
+        return;
+    }
+
+    if (node->label == "loop")
+    {
+        std::string inlabel = get_label();
+        target += inlabel + ": NOOP\n";
+
+        cond_stat(node, inlabel);
+        
         return;
     }
 
@@ -116,22 +134,6 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
         return;
     }
-    
-    if (node->label == "if")
-    {
-        cond_stat(node);
-        return;
-    }
-
-    if (node->label == "loop")
-    {
-        std::string inlabel = get_label();
-        target += inlabel + ": NOOP\n";
-
-        cond_stat(node, inlabel);
-        
-        return;
-    }
 
     if (node->label == "assign")
     {
@@ -139,6 +141,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         traverse_preorder(node->children.front());
         Token tk = node->tokens.front();
         target += "STACKW " + std::to_string(tk_stack.find(tk.instance)) + "\n";
+        
         return;
     }
 
@@ -174,26 +177,6 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
-    if (node->label == "R")
-    {
-        if (node->tokens.size() == 1)
-        {   
-            Token tk = node->tokens.front();
-
-            if (tk.type == IDENTIFIER_TK)
-            {
-                target += "STACKR " + std::to_string(tk_stack.find(tk.instance)) + "\n";
-            }
-            else // token is number literal
-                target += "LOAD " + tk.instance + "\n";
-        }
-        else // child node is expr
-            traverse_preorder(node->children.front());
-        
-        return;
-    }
-    
-
     if (node->label == "M")
     {
         Node* child = node->children.front();
@@ -210,7 +193,23 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
-    // TODO: cases for assign and loop
+    if (node->label == "R")
+    {
+        if (node->tokens.size() == 1)
+        {   
+            Token tk = node->tokens.front();
+
+            if (tk.type == IDENTIFIER_TK)
+                target += "STACKR " + std::to_string(tk_stack.find(tk.instance)) + "\n";
+            else // token is number literal
+                target += "LOAD " + tk.instance + "\n";
+        }
+        else // child node is expr
+            traverse_preorder(node->children.front());
+        
+        return;
+    }
+    
 
     if (node->children.size() > 0)
     {
