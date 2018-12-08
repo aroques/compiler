@@ -20,14 +20,10 @@ int TokenStack::find(std::string tk_instance)
 
 int TokenStack::find(std::stack <std::string> s, std::string tk_instance) 
 {
-    int cnt = -1;
-
     while (!s.empty()) 
     {
-        cnt++;
-
         if (s.top() == tk_instance)
-            return cnt;
+            return s.size() - 1;
         
         s.pop();
     }

@@ -1,5 +1,6 @@
 #include "stat_semantics/include/ParseTreeProcessor.hpp"
 #include "error_handling/include/error_handling.hpp"
+#include <iostream>
 
 static void semantics_error(int line_no, std::string reason);
 static std::string get_asm_cmd(std::string op_tk_instance);
@@ -184,8 +185,14 @@ void ParseTreeProcessor::process_node_label(Node* node)
     {
         if (node->tokens.size() == 1)
         {   
-            std::string tk = node->tokens.front().instance;
-            target += "STACKR " + std::to_string(tk_stack.find(tk)) + "\n";
+            Token tk = node->tokens.front();
+
+            if (tk.type == IDENTIFIER_TK)
+            {
+                target += "STACKR " + std::to_string(tk_stack.find(tk.instance)) + "\n";
+            }
+            else // token is number literal
+                target += "LOAD " + tk.instance + "\n";
         }
         else // child node is expr
             traverse_preorder(node->children.front());
