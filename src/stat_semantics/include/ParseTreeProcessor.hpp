@@ -25,6 +25,7 @@ private:
     std::string target = ""; // The target file that will be produced
 
     std::string get_temp_var();
+    std::string get_label();
 
     void traverse_preorder(Node* node);
     void process_node(Node* node);

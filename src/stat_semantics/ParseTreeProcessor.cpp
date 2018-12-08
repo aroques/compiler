@@ -30,6 +30,11 @@ std::string ParseTreeProcessor::get_temp_var()
     return "V" + std::to_string(temp_var_cnt++);
 }
 
+std::string ParseTreeProcessor::get_label()
+{
+    return "L" + std::to_string(label_cnt++);
+}
+
 void ParseTreeProcessor::traverse_preorder(Node* node)
 {
     if (node == NULL) 
@@ -123,6 +128,20 @@ void ParseTreeProcessor::process_node_label(Node* node)
             op_tk_instance += RO_node->tokens.at(1).instance;
 
         eval_right_left(right, left, "-"); // subtract right from left
+        
+        std::string label = get_label();
+        
+        if (op_tk_instance == "=")
+        {
+            // jump if acc positive or negative
+            target += get_asm_cmd(">=") + label + "\n";
+            target += get_asm_cmd("<=") + label + "\n";
+        }
+        else
+            target += get_asm_cmd(op_tk_instance) + label + "\n";
+       
+        traverse_preorder(node->children.at(3)); // call stat child
+        target += label + ": NOOP";
     }
 
     if (node->label == "expr")
@@ -198,7 +217,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
 void ParseTreeProcessor::eval_right_left(Node* right, Node* left, std::string op_tk_instance)
 {
-    // evaluate right child
+    // evaluate right childop_tk_instance
     traverse_preorder(right);
     
     // store result in temp var
@@ -290,22 +309,22 @@ static std::string get_asm_cmd(std::string op_tk_instance)
         return "DIV";
     
     if (op_tk_instance == "=")
-        return "DIV";
+        return "BRZERO";
 
     if (op_tk_instance == ">")
-        return "DIV";
+        return "BRZNEG";
 
     if (op_tk_instance == "<")
-        return "DIV";
+        return "BRZPOS";
 
     if (op_tk_instance == ">=")
-        return "DIV";
+        return "BRNEG";
 
     if (op_tk_instance == "<=")
-        return "DIV";
+        return "BRPOS";
 
     if (op_tk_instance == "==")
-        return "DIV";
+        return "BRZERO";
 
     print_error_and_exit("codegen: no assembly command for '" + op_tk_instance + "' operator");
     
