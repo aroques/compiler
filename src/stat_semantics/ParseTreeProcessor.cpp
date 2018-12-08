@@ -88,7 +88,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         
         push_onto_stack(id_tk.instance, id_tk_val.instance);
 
-        // do not add return here to traverse children nodes
+        // do not return here, so that we traverse children nodes
     }
 
     /*
