@@ -29,7 +29,6 @@ private:
 
     void traverse_preorder(Node* node);
     void process_node(Node* node);
-    void postprocess_node(Node* node);
     void process_node_label(Node* node);
     void process_node_tokens(Node* node);
     void postprocess_target();

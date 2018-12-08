@@ -1,11 +1,11 @@
 #!/bin/bash
 
-./comp testfile
+./comp testfile2
 
 printf '\n'
 
-cat testfile.asm
+cat testfile2.asm
 
 printf '\n'
 
-./VirtMach testfile.asm
+./VirtMach testfile2.asm

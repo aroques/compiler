@@ -42,8 +42,6 @@ void ParseTreeProcessor::traverse_preorder(Node* node)
 
     process_node(node);
     
-    postprocess_node(node);
-    
     return;
 }
 
@@ -84,13 +82,19 @@ void ParseTreeProcessor::process_node_label(Node* node)
     {
         // entering new block, so start new var count
         var_cnt_stack.push(0);
-        // TODO: Add PUSH to target
-        if (node->children.size() > 0)
+        
+        // recursively descend down tree
+        for (auto child: node->children) 
+            traverse_preorder(child);
+        
+        // Leaving block, so pop token definitions
+        for (int i = 0; i < var_cnt_stack.top(); i++)
         {
-            // recursively descend down tree
-            for (auto child: node->children) 
-                traverse_preorder(child);
+            tk_stack.pop();
+            target += "POP\n";
         }
+        // and pop number of variables defined in this block
+        var_cnt_stack.pop();
 
         return;
     }
@@ -134,14 +138,14 @@ void ParseTreeProcessor::process_node_label(Node* node)
         if (op_tk_instance == "=")
         {
             // jump if acc positive or negative
-            target += get_asm_cmd(">=") + label + "\n";
-            target += get_asm_cmd("<=") + label + "\n";
+            target += get_asm_cmd(">=") + " " + label + "\n";
+            target += get_asm_cmd("<=") + " " + label + "\n";
         }
         else
-            target += get_asm_cmd(op_tk_instance) + label + "\n";
+            target += get_asm_cmd(op_tk_instance) + " " + label + "\n";
        
         traverse_preorder(node->children.at(3)); // call stat child
-        target += label + ": NOOP";
+        target += label + ": NOOP\n";
     }
 
     if (node->label == "expr")
@@ -261,32 +265,13 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
     
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
-    target += "STACKW " + std::to_string(var_cnt_stack.top()) + "\n";
-
-    var_cnt_stack.top()++;
+    target += "STACKW " + std::to_string(var_cnt_stack.top()++) + "\n";
 }
 
 void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 {
     if (tk_stack.find(tk.instance) < 0)
         semantics_error(tk.line_number, "'" + tk.instance + "' has not been defined");
-}
-
-void ParseTreeProcessor::postprocess_node(Node* node)
-{
-    if (node->label == "block")
-    {
-        // leaving block 
-        // so, pop token definitions
-        for (int i = 0; i < var_cnt_stack.top(); i++)
-        {
-            tk_stack.pop();
-            target += "POP\n";
-        }
-        
-        // and pop number of variables defined in this block
-        var_cnt_stack.pop();
-    }
 }
 
 static void semantics_error(int line_no, std::string reason)
