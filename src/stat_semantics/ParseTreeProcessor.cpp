@@ -59,6 +59,9 @@ void ParseTreeProcessor::process_node(Node* node)
 
 void ParseTreeProcessor::process_node_label(Node* node)
 {
+    /*
+        Variable definitions: vars
+    */
     if (node->label == "vars")
     {
         // ID token definition
@@ -72,6 +75,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         // do not add return here to traverse children nodes
     }
 
+    /*
+        New blocks: block
+    */
     if (node->label == "block")
     {
         // entering new block, so start new var count
@@ -87,13 +93,16 @@ void ParseTreeProcessor::process_node_label(Node* node)
             tk_stack.pop();
             target += "POP\n";
         }
-        
+
         // and pop number of variables defined in this block
         var_cnt_stack.pop();
 
         return;
     }
     
+    /*
+        Control flow: if and loop
+    */
     if (node->label == "if")
     {
         cond_stat(node);
@@ -111,6 +120,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
+    /*
+        Input and output: in and out
+    */
     if (node->label == "in")
     {
         std::string temp_var = get_temp_var();
@@ -135,6 +147,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
+    /*
+        Variable assignment: assign
+    */
     if (node->label == "assign")
     {
         // eval child expr
@@ -145,6 +160,10 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
+    /*
+        Expressions: 
+            expr and it's possible children: A, M, and R
+    */
     if (node->label == "expr")
     {
         if (node->tokens.size() == 1)
@@ -210,7 +229,9 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
     
-
+    /*
+        If we made it here and node has children, then call them
+    */
     if (node->children.size() > 0)
     {
         // recursively descend down tree
