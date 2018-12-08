@@ -119,31 +119,26 @@ void ParseTreeProcessor::process_node_label(Node* node)
     
     if (node->label == "if")
     {
-        Node* right = node->children.at(2);     // expr
-        Node* left = node->children.at(0);      // expr
-        Node* RO_node = node->children.at(1);   // relational operator node
-        
-        std::string op_tk_instance = RO_node->tokens.at(0).instance;
-        
-        if (RO_node->tokens.size() > 1)
-            op_tk_instance += RO_node->tokens.at(1).instance;
+        cond_stat(node);
+        return;
+    }
 
-        eval_right_left(right, left, "-"); // subtract right from left
+    if (node->label == "loop")
+    {
+        std::string inlabel = get_label();
+        target += inlabel + ": NOOP\n";
+
+        cond_stat(node, inlabel);
         
-        std::string label = get_label();
-        
-        if (op_tk_instance == "=")
-        {
-            // jump if acc positive or negative
-            target += get_asm_cmd(">=") + " " + label + "\n";
-            target += get_asm_cmd("<=") + " " + label + "\n";
-        }
-        else
-            target += get_asm_cmd(op_tk_instance) + " " + label + "\n";
-       
-        traverse_preorder(node->children.at(3)); // call stat child
-        target += label + ": NOOP\n";
-        
+        return;
+    }
+
+    if (node->label == "assign")
+    {
+        // eval child expr
+        traverse_preorder(node->children.front());
+        Token tk = node->tokens.front();
+        target += "STACKW " + std::to_string(tk_stack.find(tk.instance)) + "\n";
         return;
     }
 
@@ -215,12 +210,48 @@ void ParseTreeProcessor::process_node_label(Node* node)
         return;
     }
 
+    // TODO: cases for assign and loop
+
     if (node->children.size() > 0)
     {
         // recursively descend down tree
         for (auto child: node->children) 
             traverse_preorder(child);
     }
+}
+
+void ParseTreeProcessor::cond_stat(Node* node, std::string inlabel)
+{
+    Node* right = node->children.at(2);     // expr
+    Node* left = node->children.at(0);      // expr
+    Node* RO_node = node->children.at(1);   // relational operator node
+    
+    std::string op_tk_instance = RO_node->tokens.at(0).instance;
+    
+    if (RO_node->tokens.size() > 1)
+        op_tk_instance += RO_node->tokens.at(1).instance;
+
+    eval_right_left(right, left, "-"); // subtract right from left
+    
+    std::string label = get_label();
+    
+    if (op_tk_instance == "=")
+    {
+        // jump if acc positive or negative
+        target += get_asm_cmd(">=") + " " + label + "\n";
+        target += get_asm_cmd("<=") + " " + label + "\n";
+    }
+    else
+        target += get_asm_cmd(op_tk_instance) + " " + label + "\n";
+    
+    Node* stat_node = node->children.at(3);
+    traverse_preorder(stat_node);
+
+    // loop node adds un-conditional jump back to top inlabel to re-evaluate condition 
+    if (inlabel != "")
+        target += "BR " + inlabel + "\n";
+
+    target += label + ": NOOP\n";   
 }
 
 void ParseTreeProcessor::eval_right_left(Node* right, Node* left, std::string op_tk_instance)
@@ -267,7 +298,7 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
     // push token onto stack and count it
     tk_stack.push(tk_instance);
     var_cnt_stack.top()++;
-    
+
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
     target += "STACKW " + std::to_string(0) + "\n";
