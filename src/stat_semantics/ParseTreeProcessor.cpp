@@ -266,6 +266,7 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
 {
     // push token onto stack and count it
     tk_stack.push(tk_instance);
+    var_cnt_stack.top()++;
     
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
