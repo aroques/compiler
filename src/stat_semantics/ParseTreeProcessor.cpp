@@ -113,8 +113,11 @@ void ParseTreeProcessor::process_node_label(Node* node)
 
     if (node->label == "out")
     {
+        // call child expr
         traverse_preorder(node->children.front());
-        std::string temp_var = get_temp_var();// process identifier token
+        
+        // store result in acc
+        std::string temp_var = get_temp_var();
         target += "STORE " + temp_var + "\n";
         target += "WRITE " + temp_var + "\n";
 
@@ -147,6 +150,8 @@ void ParseTreeProcessor::process_node_label(Node* node)
        
         traverse_preorder(node->children.at(3)); // call stat child
         target += label + ": NOOP\n";
+        
+        return;
     }
 
     if (node->label == "expr")
