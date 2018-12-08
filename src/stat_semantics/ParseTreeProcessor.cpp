@@ -69,14 +69,7 @@ void ParseTreeProcessor::process_node_label(Node* node)
         
         push_onto_stack(id_tk.instance, id_tk_val.instance);
 
-        if (node->children.size() > 0)
-        {
-            // recursively descend down tree
-            for (auto child: node->children) 
-                traverse_preorder(child);
-        }
-
-        return;
+        // do not add return here to traverse children nodes
     }
 
     if (node->label == "block")
@@ -228,7 +221,6 @@ void ParseTreeProcessor::process_node_label(Node* node)
         for (auto child: node->children) 
             traverse_preorder(child);
     }
-        
 }
 
 void ParseTreeProcessor::eval_right_left(Node* right, Node* left, std::string op_tk_instance)
