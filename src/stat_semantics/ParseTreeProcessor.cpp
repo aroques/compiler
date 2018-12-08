@@ -5,27 +5,40 @@
 static void semantics_error(int line_no, std::string reason);
 static std::string get_asm_cmd(std::string op_tk_instance);
 
+/*
+    Public
+*/
 ParseTreeProcessor::ParseTreeProcessor() 
 {
+    // start off with 0 variables defined in global scope
     var_cnt_stack.push(0);
 }
 
 void ParseTreeProcessor::process_parse_tree(Node* root)
 {
     traverse_preorder(root);
+    
     postprocess_target();
+    
     return;
 }
 
+/*
+    Private
+*/
 void ParseTreeProcessor::postprocess_target()
 {
-    // initialize temp vars
+    // initialize temp variables
     for (int i = 0; i < temp_var_cnt; i++)
         target += "V" + std::to_string(i) + " 0" + "\n";
     
+    // add stop to end of file
     target += "STOP\n";
 }
 
+/*
+    Getters for temp vars and labels
+*/
 std::string ParseTreeProcessor::get_temp_var()
 {
     return "V" + std::to_string(temp_var_cnt++);
@@ -36,6 +49,9 @@ std::string ParseTreeProcessor::get_label()
     return "L" + std::to_string(label_cnt++);
 }
 
+/*
+    Recursive preorder traversal
+*/
 void ParseTreeProcessor::traverse_preorder(Node* node)
 {
     if (node == NULL) 
@@ -305,6 +321,9 @@ void ParseTreeProcessor::process_node_tokens(Node* node)
     }
 }
 
+/* 
+    Vars node verifies id token definitions and pushes variables onto stack
+*/
 void ParseTreeProcessor::verify_id_tk_definition(std::string tk_instance, int tk_line_no)
 {
     int tk_idx = tk_stack.find(tk_instance);
@@ -324,6 +343,9 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
     target += "STACKW " + std::to_string(0) + "\n";
 }
 
+/*
+    Rule that says identifiers must be defined before they are used
+*/
 void ParseTreeProcessor::verify_id_tk_usage(Token tk)
 {
     if (tk_stack.find(tk.instance) < 0)
