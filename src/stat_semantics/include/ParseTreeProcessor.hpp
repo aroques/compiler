@@ -22,6 +22,8 @@ private:
     int label_cnt = 0;
 
     std::string target = ""; // The target file that will be produced
+    
+    void postprocess_target();
 
     std::string get_temp_var();
     std::string get_label();
@@ -29,15 +31,15 @@ private:
     void traverse_preorder(Node* node);
     void process_node(Node* node);
     void process_node_label(Node* node);
-    void process_node_tokens(Node* node);
-    void postprocess_target();
 
     void cond_stat(Node* node, std::string inlabel="");
     void eval_right_left(Node* left, Node* right, std::string op_tk_instance);
 
+    // vars node helpers
+    void verify_id_tk_definition(std::string tk_instance, int tk_line_no);
     void push_onto_stack(std::string tk_instance, std::string tk_val);
 
-    void verify_id_tk_definition(std::string tk_instance, int tk_line_no);
+    void process_node_tokens(Node* node);
     void verify_id_tk_usage(Token tk);
 
 public:

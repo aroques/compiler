@@ -340,7 +340,7 @@ void ParseTreeProcessor::push_onto_stack(std::string tk_instance, std::string tk
 
     target += "LOAD " + tk_val + "\n";
     target += "PUSH\n";
-    target += "STACKW " + std::to_string(0) + "\n";
+    target += "STACKW 0\n";
 }
 
 /*
