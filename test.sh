@@ -2,7 +2,7 @@
 
 file=$1
 
-./comp $file
+./comp "test_src/$file"
 
 printf '\n'
 
@@ -10,4 +10,4 @@ cat "$file.asm"
 
 printf '\n'
 
-./VirtMach "$file.asm"
+./test_src/VirtMach "$file.asm"

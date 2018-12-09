@@ -1,0 +1,13 @@
+void
+
+start
+
+    var x : 10
+
+    loop (x >= 6)
+    start
+        out [ x ] .
+        let x = x - 1 .
+    stop
+
+stop

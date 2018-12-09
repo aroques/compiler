@@ -317,7 +317,7 @@ void ParseTreeProcessor::process_node_tokens(Node* node)
         
         // process identifier token
         if (node->label != "vars")
-            verify_id_tk_usage(tk); 
+            verify_id_tk_usage(tk);
     }
 }
 

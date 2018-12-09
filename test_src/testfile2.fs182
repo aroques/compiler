@@ -1,0 +1,9 @@
+void
+
+start
+
+    var x : 4
+    
+    out [ -x ] .
+
+stop
