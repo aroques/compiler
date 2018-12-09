@@ -6,8 +6,8 @@ file=$1
 
 printf '\n'
 
-cat "$file.asm"
+cat "test_src/$file.asm"
 
 printf '\n'
 
-./test_src/VirtMach "$file.asm"
+./test_src/VirtMach "test_src/$file.asm"
