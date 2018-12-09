@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
     }
 
     Node* root = parser();
+    
     std::string target = generate_target(root);
 
     std::string target_filename = get_target_filename(argc, argv);
