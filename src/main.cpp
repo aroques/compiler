@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "parser/include/parser.hpp"
-#include "stat_semantics/include/stat_semantics.hpp"
+#include "code_gen/include/code_gen.hpp"
 
 // Prototypes
 void validate_argc(int argc);

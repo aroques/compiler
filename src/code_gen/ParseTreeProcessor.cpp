@@ -1,6 +1,6 @@
-#include "stat_semantics/include/ParseTreeProcessor.hpp"
+#include "code_gen/include/ParseTreeProcessor.hpp"
 #include "error_handling/include/error_handling.hpp"
-#include "stat_semantics/include/asm_commands.hpp"
+#include "code_gen/include/asm_commands.hpp"
 #include <iostream>
 
 static void semantics_error(int line_no, std::string reason);

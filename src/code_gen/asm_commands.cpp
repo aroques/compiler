@@ -1,5 +1,5 @@
 #include "error_handling/include/error_handling.hpp"
-#include "stat_semantics/include/asm_commands.hpp"
+#include "code_gen/include/asm_commands.hpp"
 
 std::string get_asm_cmd(std::string op_tk_instance)
 {

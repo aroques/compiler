@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "stat_semantics/include/ParseTreeProcessor.hpp"
+#include "code_gen/include/ParseTreeProcessor.hpp"
 
 std::string generate_target(Node* root)
 {

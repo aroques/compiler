@@ -1,4 +1,4 @@
-#include "stat_semantics/include/TokenStack.hpp"
+#include "code_gen/include/TokenStack.hpp"
 
 TokenStack::TokenStack() {};
 
